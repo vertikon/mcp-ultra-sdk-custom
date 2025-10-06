@@ -1,7 +1,14 @@
 # MCP Ultra SDK - Custom Extension Framework
 
-**Versão:** 1.0.0
-**Status:** Production Ready
+[![CI](https://github.com/vertikon/mcp-ultra-sdk-custom/actions/workflows/ci.yml/badge.svg)](https://github.com/vertikon/mcp-ultra-sdk-custom/actions/workflows/ci.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/vertikon/mcp-ultra-sdk-custom.svg)](https://pkg.go.dev/github.com/vertikon/mcp-ultra-sdk-custom)
+[![Go Version](https://img.shields.io/badge/Go-1.23+-blue.svg)](https://golang.org)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/vertikon/mcp-ultra-sdk-custom)](https://github.com/vertikon/mcp-ultra-sdk-custom/releases)
+[![Ultra Verified](https://img.shields.io/badge/Ultra%20Verified-100%25-success)](docs/CERTIFICADO_VALIDACAO_V9.md)
+
+**Versão:** 9.0.0
+**Status:** ✅ ULTRA VERIFIED CERTIFIED
 **Licença:** MIT
 
 SDK de customização para o ecossistema **mcp-ultra**, permitindo estender funcionalidades através de plugins sem modificar o template original.
@@ -59,7 +66,7 @@ mcp-ultra-sdk-custom/
 ### Instalar o SDK
 
 ```bash
-go get github.com/vertikon/mcp-ultra-sdk-custom@v1.0.0
+go get github.com/vertikon/mcp-ultra-sdk-custom@v9.0.0
 ```
 
 **Pré-requisitos:**
