@@ -38,10 +38,10 @@ func Sync(templatePath string) error {
 
 	// 3. Copiar template → seed (ignorando .git)
 	ignore := map[string]bool{
-		".git":     true,
-		".github":  true,
-		".vscode":  true,
-		".idea":    true,
+		".git":         true,
+		".github":      true,
+		".vscode":      true,
+		".idea":        true,
 		"node_modules": true,
 	}
 

@@ -72,14 +72,14 @@ type AuditRequest struct {
 
 // AuditResponse representa a resposta de auditoria
 type AuditResponse struct {
-	AuditID            string        `json:"audit_id"`
-	Status             string        `json:"status"`
-	SDKVersion         string        `json:"sdk_version"`
-	CompatibilityScore int           `json:"compatibility_score"`
-	Issues             []AuditIssue  `json:"issues"`
-	Recommendations    []string      `json:"recommendations"`
-	AuditDetails       AuditDetails  `json:"audit_details"`
-	Timestamp          time.Time     `json:"timestamp"`
+	AuditID            string       `json:"audit_id"`
+	Status             string       `json:"status"`
+	SDKVersion         string       `json:"sdk_version"`
+	CompatibilityScore int          `json:"compatibility_score"`
+	Issues             []AuditIssue `json:"issues"`
+	Recommendations    []string     `json:"recommendations"`
+	AuditDetails       AuditDetails `json:"audit_details"`
+	Timestamp          time.Time    `json:"timestamp"`
 }
 
 // AuditIssue representa um problema encontrado na auditoria
@@ -101,14 +101,14 @@ type AuditDetails struct {
 
 // VersionReport representa um relatório de versão
 type VersionReport struct {
-	ReportID           string                 `json:"report_id"`
-	SDKVersion         string                 `json:"sdk_version"`
-	TemplateVersion    string                 `json:"template_version"`
-	CompatibilityMatrix map[string]string     `json:"compatibility_matrix"`
-	VersionGraph       map[string]interface{} `json:"version_graph"`
-	Warnings           []string               `json:"warnings"`
-	Errors             []string               `json:"errors"`
-	Timestamp          time.Time              `json:"timestamp"`
+	ReportID            string                 `json:"report_id"`
+	SDKVersion          string                 `json:"sdk_version"`
+	TemplateVersion     string                 `json:"template_version"`
+	CompatibilityMatrix map[string]string      `json:"compatibility_matrix"`
+	VersionGraph        map[string]interface{} `json:"version_graph"`
+	Warnings            []string               `json:"warnings"`
+	Errors              []string               `json:"errors"`
+	Timestamp           time.Time              `json:"timestamp"`
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -143,13 +143,13 @@ type ValidationRequest struct {
 
 // ValidationResponse representa a resposta de validação
 type ValidationResponse struct {
-	ValidationID      string                 `json:"validation_id"`
-	Approved          bool                   `json:"approved"`
-	CompatibilityStatus string               `json:"compatibility_status"`
-	ValidationResults map[string]string      `json:"validation_results"`
-	DeploymentSafe    bool                   `json:"deployment_safe"`
-	RollbackPlan      RollbackPlan           `json:"rollback_plan"`
-	Timestamp         time.Time              `json:"timestamp"`
+	ValidationID        string            `json:"validation_id"`
+	Approved            bool              `json:"approved"`
+	CompatibilityStatus string            `json:"compatibility_status"`
+	ValidationResults   map[string]string `json:"validation_results"`
+	DeploymentSafe      bool              `json:"deployment_safe"`
+	RollbackPlan        RollbackPlan      `json:"rollback_plan"`
+	Timestamp           time.Time         `json:"timestamp"`
 }
 
 // RollbackPlan contém informações do plano de rollback

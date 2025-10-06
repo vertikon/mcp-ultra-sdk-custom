@@ -1,13 +1,13 @@
-﻿module github.com/vertikon/mcp-ultra-sdk-custom
+module github.com/vertikon/mcp-ultra-sdk-custom
 
-go 1.24
+go 1.24.0
 
 require github.com/gorilla/mux v1.8.1
 
 require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	gopkg.in/yaml.v2 v2.4.3 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
 require (
