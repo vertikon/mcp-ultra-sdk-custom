@@ -41,19 +41,18 @@ jobs:
         languages: ${{ matrix.language }}
         # Queries: security-extended, security-and-quality
         queries: security-and-quality
+        build-mode: manual
 
         # Custom CodeQL config (optional)
         # config-file: ./.github/codeql/codeql-config.yml
 
-    # Autobuild attempts to build any compiled languages (Go, C/C++, C#)
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@v3
-
-    # Alternative: Manual build steps
-    # - name: Build
-    #   run: |
-    #     go mod download
-    #     go build ./cmd
+    # Manual build to ensure all packages compile correctly
+    - name: Build
+      run: |
+        go env -w CGO_ENABLED=0
+        go mod download
+        go mod tidy
+        go build ./...
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
