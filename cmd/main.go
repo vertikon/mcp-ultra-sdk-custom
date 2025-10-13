@@ -4,9 +4,18 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/vertikon/mcp-ultra-sdk-custom/internal/handlers"
+)
+
+const (
+	defaultPort       = ":8080"
+	readTimeout       = 10 * time.Second
+	writeTimeout      = 10 * time.Second
+	idleTimeout       = 60 * time.Second
+	readHeaderTimeout = 5 * time.Second
 )
 
 func main() {
@@ -26,9 +35,18 @@ func main() {
 	// Metrics
 	mux.Handle("/metrics", promhttp.Handler())
 
-	addr := ":8080"
-	logger.Info("server starting", "addr", addr)
-	if err := http.ListenAndServe(addr, logRequest(logger, mux)); err != nil {
+	// Configurar servidor com timeouts para segurança (G114)
+	srv := &http.Server{
+		Addr:              defaultPort,
+		Handler:           logRequest(logger, mux),
+		ReadTimeout:       readTimeout,
+		WriteTimeout:      writeTimeout,
+		IdleTimeout:       idleTimeout,
+		ReadHeaderTimeout: readHeaderTimeout,
+	}
+
+	logger.Info("server starting", "addr", srv.Addr)
+	if err := srv.ListenAndServe(); err != nil {
 		logger.Error("server failed", "err", err)
 		os.Exit(1)
 	}

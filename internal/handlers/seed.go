@@ -2,10 +2,14 @@ package handlers
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
+	"os"
 
 	"github.com/vertikon/mcp-ultra-sdk-custom/internal/seeds"
 )
+
+var logger = slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
 // SeedSyncRequest representa uma solicitação de sincronização de seed
 type SeedSyncRequest struct {
@@ -25,7 +29,9 @@ func SeedSyncHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Decodificar request (se houver body)
 	if r.Body != nil {
-		_ = json.NewDecoder(r.Body).Decode(&req)
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			logger.Warn("Failed to decode request body", "error", err)
+		}
 	}
 
 	// Usar caminho padrão se não especificado
@@ -42,7 +48,9 @@ func SeedSyncHandler(w http.ResponseWriter, r *http.Request) {
 			Status:  "error",
 			Message: err.Error(),
 		}
-		_ = json.NewEncoder(w).Encode(resp)
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			logger.Error("Error encoding error response", "error", err)
+		}
 		return
 	}
 
@@ -52,13 +60,17 @@ func SeedSyncHandler(w http.ResponseWriter, r *http.Request) {
 		Status: "ok",
 		Seed:   "seeds/mcp-ultra",
 	}
-	_ = json.NewEncoder(w).Encode(resp)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		logger.Error("Error encoding success response", "error", err)
+	}
 }
 
 // SeedStatusHandler retorna o status da seed interna
-func SeedStatusHandler(w http.ResponseWriter, r *http.Request) {
+func SeedStatusHandler(w http.ResponseWriter, _ *http.Request) {
 	status := seeds.Status()
 
 	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(status)
+	if err := json.NewEncoder(w).Encode(status); err != nil {
+		logger.Error("Error encoding status response", "error", err)
+	}
 }

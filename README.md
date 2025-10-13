@@ -61,17 +61,17 @@ mcp-ultra-sdk-custom/
 
 ## 🚀 Quick Start
 
-## Installation
-
-### Instalar o SDK
-
-```bash
-go get github.com/vertikon/mcp-ultra-sdk-custom@v9.0.0
-```
+### 📦 Instalação
 
 **Pré-requisitos:**
 - Go 1.21 ou superior
 - Git
+
+**Instalar o SDK:**
+
+```bash
+go get github.com/vertikon/mcp-ultra-sdk-custom@v9.0.0
+```
 
 ### 2. Criar um Novo Plugin
 
@@ -257,6 +257,43 @@ func myHandler(w http.ResponseWriter, r *http.Request) {
 
 ---
 
+## ⚙️ Configuração
+
+### Variáveis de Ambiente
+
+| Variável | Descrição | Padrão | Obrigatório |
+|----------|-----------|--------|-------------|
+| `PORT` | Porta HTTP do servidor | `8080` | Não |
+| `LOG_LEVEL` | Nível de log (debug\|info\|warn\|error) | `info` | Não |
+| `GOMEMLIMIT` | Limite de memória Go (alinhado ao pod limit) | - | Recomendado |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | Endpoint OpenTelemetry | - | Não |
+| `OTEL_RESOURCE_ATTRIBUTES` | Atributos do recurso OTEL | - | Não |
+| `NATS_URL` | URL do servidor NATS | `nats://localhost:4222` | Não |
+| `NATS_CLUSTER_ID` | ID do cluster NATS | `mcp-cluster` | Não |
+| `JWT_SECRET` | Secret para validação JWT | - | Se usar auth |
+
+### Exemplo .env
+
+```bash
+# Server
+PORT=8080
+LOG_LEVEL=info
+
+# Observability
+GOMEMLIMIT=512MiB
+OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+OTEL_RESOURCE_ATTRIBUTES=service.name=mcp-ultra-sdk-custom,service.version=9.0.0
+
+# Messaging
+NATS_URL=nats://nats:4222
+NATS_CLUSTER_ID=mcp-prod
+
+# Security
+JWT_SECRET=your-secret-key-here
+```
+
+---
+
 ## 🏥 Health Endpoints
 
 Automaticamente disponíveis após `bootstrap.Bootstrap()`:
@@ -265,6 +302,7 @@ Automaticamente disponíveis após `bootstrap.Bootstrap()`:
 - `GET /readyz` - Readiness probe (503 se não pronto)
 - `GET /health` - Alias de `/healthz`
 - `GET /ping` - Alias de `/healthz`
+- `GET /metrics` - Métricas Prometheus (se habilitado)
 
 ### Controlar Readiness
 
@@ -276,6 +314,24 @@ bootstrap.MarkReady()
 
 // Marcar como não-pronto
 bootstrap.MarkNotReady()
+```
+
+### Kubernetes Probes
+
+```yaml
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: 8080
+  initialDelaySeconds: 10
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /readyz
+    port: 8080
+  initialDelaySeconds: 5
+  periodSeconds: 5
 ```
 
 ---

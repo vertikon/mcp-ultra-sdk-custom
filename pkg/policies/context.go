@@ -19,8 +19,12 @@ func WithIdentity(ctx context.Context, subject string, roles []string) context.C
 	})
 }
 
-// FromIdentity extrai identidade do contexto
+// FromIdentity extrai identidade do contexto.
+// Retorna nil se a identidade não estiver presente ou tiver tipo incorreto.
 func FromIdentity(ctx context.Context) *Identity {
-	v, _ := ctx.Value(identityKey{}).(*Identity)
-	return v
+	identity, ok := ctx.Value(identityKey{}).(*Identity)
+	if !ok {
+		return nil
+	}
+	return identity
 }

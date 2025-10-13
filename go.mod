@@ -7,7 +7,7 @@ require github.com/gorilla/mux v1.8.1
 require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
+	go.yaml.in/yaml/v2 v2.4.2 // indirect
 )
 
 require (
@@ -20,4 +20,3 @@ require (
 	golang.org/x/sys v0.36.0 // indirect
 	google.golang.org/protobuf v1.36.10 // indirect
 )
-

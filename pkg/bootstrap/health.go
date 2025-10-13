@@ -2,6 +2,7 @@
 package bootstrap
 
 import (
+	"log"
 	"net/http"
 	"sync/atomic"
 )
@@ -21,16 +22,22 @@ func MarkNotReady() {
 // healthz é o endpoint de liveness
 func healthz(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(200)
-	w.Write([]byte("ok"))
+	if _, err := w.Write([]byte("ok")); err != nil {
+		log.Printf("Error writing healthz response: %v", err)
+	}
 }
 
 // readiness é o endpoint de readiness
 func readiness(w http.ResponseWriter, _ *http.Request) {
 	if !ready.Load() {
 		w.WriteHeader(503)
-		w.Write([]byte("not ready"))
+		if _, err := w.Write([]byte("not ready")); err != nil {
+			log.Printf("Error writing readiness not-ready response: %v", err)
+		}
 		return
 	}
 	w.WriteHeader(200)
-	w.Write([]byte("ready"))
+	if _, err := w.Write([]byte("ready")); err != nil {
+		log.Printf("Error writing readiness ready response: %v", err)
+	}
 }

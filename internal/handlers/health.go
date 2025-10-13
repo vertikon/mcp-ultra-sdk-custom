@@ -2,31 +2,43 @@ package handlers
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
+	"os"
 )
 
-type HealthHandler struct{}
+type HealthHandler struct {
+	logger *slog.Logger
+}
 
 func NewHealthHandler() *HealthHandler {
-	return &HealthHandler{}
+	return &HealthHandler{
+		logger: slog.New(slog.NewJSONHandler(os.Stdout, nil)),
+	}
 }
 
-func (h *HealthHandler) Live(w http.ResponseWriter, r *http.Request) {
+func (h *HealthHandler) Live(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"status": "alive"})
+	if err := json.NewEncoder(w).Encode(map[string]string{"status": "alive"}); err != nil {
+		h.logger.Error("Error encoding live response", "error", err)
+	}
 }
 
-func (h *HealthHandler) Ready(w http.ResponseWriter, r *http.Request) {
+func (h *HealthHandler) Ready(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"status": "ready"})
+	if err := json.NewEncoder(w).Encode(map[string]string{"status": "ready"}); err != nil {
+		h.logger.Error("Error encoding ready response", "error", err)
+	}
 }
 
-func (h *HealthHandler) Health(w http.ResponseWriter, r *http.Request) {
+func (h *HealthHandler) Health(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+	if err := json.NewEncoder(w).Encode(map[string]string{"status": "ok"}); err != nil {
+		h.logger.Error("Error encoding health response", "error", err)
+	}
 }
 
 func (h *HealthHandler) Livez(w http.ResponseWriter, r *http.Request) {
@@ -38,9 +50,11 @@ func (h *HealthHandler) Readyz(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *HealthHandler) Metrics() http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "text/plain")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("# Metrics placeholder\n"))
+		if _, err := w.Write([]byte("# Metrics placeholder\n")); err != nil {
+			h.logger.Error("Error writing metrics response", "error", err)
+		}
 	})
 }

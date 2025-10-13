@@ -10,7 +10,8 @@ import (
 )
 
 const (
-	SeedPath = "seeds/mcp-ultra"
+	SeedPath              = "seeds/mcp-ultra"
+	defaultDirPermissions = 0755
 )
 
 // StatusInfo contém informações sobre o status da seed
@@ -32,7 +33,7 @@ func Sync(templatePath string) error {
 
 	// 2. Criar diretório da seed se não existir
 	seedDir := filepath.Dir(SeedPath)
-	if err := os.MkdirAll(seedDir, 0755); err != nil {
+	if err := os.MkdirAll(seedDir, defaultDirPermissions); err != nil {
 		return fmt.Errorf("erro ao criar diretório da seed: %w", err)
 	}
 
@@ -139,7 +140,7 @@ func copyTree(src, dst string, ignore map[string]bool) error {
 
 		// Se é diretório, criar
 		if info.IsDir() {
-			return os.MkdirAll(target, 0755)
+			return os.MkdirAll(target, defaultDirPermissions)
 		}
 
 		// Se é arquivo, copiar
@@ -154,10 +155,14 @@ func copyFile(src, dst string) error {
 	if err != nil {
 		return err
 	}
-	defer in.Close()
+	defer func() {
+		if err := in.Close(); err != nil {
+			fmt.Printf("Warning: failed to close source file: %v\n", err)
+		}
+	}()
 
 	// Criar diretório de destino se necessário
-	if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(dst), defaultDirPermissions); err != nil {
 		return err
 	}
 
@@ -216,7 +221,11 @@ func addReplaces(gomodPath string) error {
 	if err != nil {
 		return fmt.Errorf("erro ao abrir go.mod: %w", err)
 	}
-	defer f.Close()
+	defer func() {
+		if err := f.Close(); err != nil {
+			fmt.Printf("Warning: failed to close go.mod: %v\n", err)
+		}
+	}()
 
 	if _, err := f.WriteString(replaces); err != nil {
 		return fmt.Errorf("erro ao escrever replaces: %w", err)

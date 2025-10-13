@@ -9,6 +9,8 @@ import (
 	"text/template"
 )
 
+const defaultDirPermissions = 0755
+
 const pluginTemplate = `package {{.Name}}
 
 import (
@@ -68,7 +70,7 @@ func main() {
 
 	// Criar diretório
 	dir := filepath.Join(*output, *name)
-	if err := os.MkdirAll(dir, 0755); err != nil {
+	if err := os.MkdirAll(dir, defaultDirPermissions); err != nil {
 		fmt.Printf("Erro ao criar diretório: %v\n", err)
 		os.Exit(1)
 	}
@@ -80,7 +82,11 @@ func main() {
 		fmt.Printf("Erro ao criar arquivo: %v\n", err)
 		os.Exit(1)
 	}
-	defer f.Close()
+	defer func() {
+		if err := f.Close(); err != nil {
+			fmt.Printf("Erro ao fechar arquivo: %v\n", err)
+		}
+	}()
 
 	tmpl := template.Must(template.New("plugin").Parse(pluginTemplate))
 	if err := tmpl.Execute(f, map[string]string{"Name": *name}); err != nil {
