@@ -58,9 +58,15 @@ func TestRegisterDuplicate(t *testing.T) {
 func TestMiddlewarePriority(t *testing.T) {
 	registry.Reset()
 
-	_ = registry.Register("high", testMiddlewarePlugin{priority: 10})
-	_ = registry.Register("low", testMiddlewarePlugin{priority: 1})
-	_ = registry.Register("medium", testMiddlewarePlugin{priority: 5})
+	if err := registry.Register("high", testMiddlewarePlugin{priority: 10}); err != nil {
+		t.Fatalf("Failed to register high priority middleware: %v", err)
+	}
+	if err := registry.Register("low", testMiddlewarePlugin{priority: 1}); err != nil {
+		t.Fatalf("Failed to register low priority middleware: %v", err)
+	}
+	if err := registry.Register("medium", testMiddlewarePlugin{priority: 5}); err != nil {
+		t.Fatalf("Failed to register medium priority middleware: %v", err)
+	}
 
 	middlewares := registry.MiddlewareInjectors()
 
@@ -83,7 +89,9 @@ func TestMiddlewarePriority(t *testing.T) {
 func TestReset(t *testing.T) {
 	registry.Reset()
 
-	_ = registry.Register("test", testRoutePlugin{})
+	if err := registry.Register("test", testRoutePlugin{}); err != nil {
+		t.Fatalf("Failed to register test plugin: %v", err)
+	}
 
 	if len(registry.RouteInjectors()) != 1 {
 		t.Fatal("Plugin deveria estar registrado")

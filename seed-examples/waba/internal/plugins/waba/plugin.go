@@ -7,10 +7,12 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"io"
+	"log"
 	"net/http"
 	"os"
 
 	"github.com/vertikon/mcp-ultra-sdk-custom/pkg/contracts"
+	"github.com/vertikon/mcp-ultra-sdk-custom/pkg/httpx"
 	"github.com/vertikon/mcp-ultra-sdk-custom/pkg/registry"
 )
 
@@ -44,12 +46,12 @@ func (p *WABAPlugin) verifyWebhook(w http.ResponseWriter, r *http.Request) {
 	expected := os.Getenv("WABA_VERIFY_TOKEN")
 
 	if verify != "" && challenge != "" && verify == expected {
-		w.WriteHeader(200)
+		w.WriteHeader(httpx.StatusOK)
 		_, _ = w.Write([]byte(challenge))
 		return
 	}
 
-	http.Error(w, "verification failed", 403)
+	http.Error(w, "verification failed", httpx.StatusForbidden)
 }
 
 // POST webhook com X-Hub-Signature-256
@@ -62,16 +64,20 @@ func (p *WABAPlugin) handleWebhook(w http.ResponseWriter, r *http.Request) {
 
 	if secret != "" {
 		mac := hmac.New(sha256.New, []byte(secret))
-		mac.Write(body)
+		if _, err := mac.Write(body); err != nil {
+			log.Printf("Error writing to HMAC: %v", err)
+			http.Error(w, "signature validation error", httpx.StatusInternalServerError)
+			return
+		}
 		exp := "sha256=" + hex.EncodeToString(mac.Sum(nil))
 		if sig != exp {
-			http.Error(w, "invalid signature", 403)
+			http.Error(w, "invalid signature", httpx.StatusForbidden)
 			return
 		}
 	}
 
 	// TODO: parse eventos, enfileirar, etc.
-	w.WriteHeader(200)
+	w.WriteHeader(httpx.StatusOK)
 }
 
 func (p *WABAPlugin) handleSend(w http.ResponseWriter, r *http.Request) {
@@ -82,21 +88,28 @@ func (p *WABAPlugin) handleSend(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, err.Error(), 400)
+		http.Error(w, err.Error(), httpx.StatusBadRequest)
 		return
 	}
 
 	// TODO: chamar adapter Meta Graph
-	json.NewEncoder(w).Encode(map[string]any{
+	if err := json.NewEncoder(w).Encode(map[string]any{
 		"message_id": "wamid.mock",
 		"status":     "queued",
-	})
+	}); err != nil {
+		log.Printf("Error encoding response: %v", err)
+		http.Error(w, "encoding error", httpx.StatusInternalServerError)
+		return
+	}
 }
 
 func (p *WABAPlugin) handleTemplates(w http.ResponseWriter, r *http.Request) {
 	// TODO: listar via Graph API
-	json.NewEncoder(w).Encode([]map[string]string{
+	if err := json.NewEncoder(w).Encode([]map[string]string{
 		{"id": "1", "name": "welcome", "language": "pt_BR"},
 		{"id": "2", "name": "order_confirmation", "language": "pt_BR"},
-	})
+	}); err != nil {
+		log.Printf("Error encoding templates response: %v", err)
+		http.Error(w, "encoding error", httpx.StatusInternalServerError)
+	}
 }

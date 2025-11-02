@@ -73,6 +73,34 @@ mcp-ultra-sdk-custom/
 go get github.com/vertikon/mcp-ultra-sdk-custom@v9.0.0
 ```
 
+### ✅ Validação da Instalação
+
+Após instalar o SDK, valide a configuração:
+
+```bash
+# 1. Verificar dependências
+go mod download
+go mod verify
+
+# 2. Executar testes
+go test ./pkg/... -v -cover
+
+# 3. Compilar projeto
+go build ./cmd/...
+
+# 4. Verificar linter (recomendado)
+golangci-lint run ./...
+
+# 5. Verificar formatação
+gofmt -l .
+```
+
+**Saída esperada:**
+- ✅ Todos os testes passando (PASS)
+- ✅ Coverage >= 70%
+- ✅ Zero erros de compilação
+- ✅ Zero warnings do linter
+
 ### 2. Criar um Novo Plugin
 
 Use a CLI para gerar scaffold:
@@ -127,7 +155,7 @@ func (p *Plugin) createCampaign(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-## Usage
+## 🚦 Execução
 
 ### Inicializar no main.go
 
@@ -158,6 +186,32 @@ func main() {
     log.Println("🚀 Servidor iniciando na porta 8080")
     http.ListenAndServe(":8080", mux)
 }
+```
+
+### Executar Servidor
+
+```bash
+# Desenvolvimento
+go run ./cmd/main.go
+
+# Produção (compilado)
+go build -o bin/server ./cmd/main.go
+./bin/server
+```
+
+### Validar Servidor em Execução
+
+```bash
+# Health check
+curl http://localhost:8080/healthz
+# Esperado: 200 OK
+
+# Readiness
+curl http://localhost:8080/readyz
+# Esperado: 200 OK (ou 503 se não pronto)
+
+# Listar rotas (debug)
+curl http://localhost:8080/debug/routes  # Se habilitado
 ```
 
 ---

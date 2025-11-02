@@ -18,14 +18,14 @@ func Auth(tv TokenValidator) func(http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			auth := r.Header.Get("Authorization")
 			if !strings.HasPrefix(auth, "Bearer ") {
-				http.Error(w, "missing bearer token", 401)
+				http.Error(w, "missing bearer token", StatusUnauthorized)
 				return
 			}
 
 			token := strings.TrimPrefix(auth, "Bearer ")
 			sub, roles, err := tv.Validate(token)
 			if err != nil {
-				http.Error(w, "invalid token", 401)
+				http.Error(w, "invalid token", StatusUnauthorized)
 				return
 			}
 

@@ -2,8 +2,7 @@
 package bootstrap
 
 import (
-	"log"
-
+	"github.com/vertikon/mcp-ultra-sdk-custom/pkg/logger"
 	"github.com/vertikon/mcp-ultra-sdk-custom/pkg/registry"
 	"github.com/vertikon/mcp-ultra-sdk-custom/pkg/router"
 	"github.com/vertikon/mcp-ultra-sdk-custom/pkg/router/middleware"
@@ -11,9 +10,9 @@ import (
 
 // Config configura bootstrap
 type Config struct {
+	CORSOrigins    []string
 	EnableRecovery bool
 	EnableLogger   bool
-	CORSOrigins    []string
 }
 
 // Bootstrap inicializa SDK
@@ -42,17 +41,23 @@ func Bootstrap(cfg Config) *router.Mux {
 
 	// Middlewares customizados (de plugins)
 	for _, mi := range registry.MiddlewareInjectors() {
-		log.Printf("Registrando middleware: %s (priority=%d)",
-			mi.Name(), mi.Priority())
+		logger.Info("registering middleware",
+			"name", mi.Name(),
+			"priority", mi.Priority())
 		mux.Use(mi.Middleware())
 	}
 
 	// Rotas de plugins
 	for _, ri := range registry.RouteInjectors() {
-		log.Printf("Registrando plugin: %s v%s", ri.Name(), ri.Version())
+		logger.Info("registering plugin",
+			"name", ri.Name(),
+			"version", ri.Version())
 
 		for _, route := range ri.Routes() {
-			log.Printf("  - %s %s", route.Method, route.Path)
+			logger.Info("registering route",
+				"method", route.Method,
+				"path", route.Path,
+				"plugin", ri.Name())
 			mux.Handle(route.Method, route.Path, route.Handler)
 		}
 	}

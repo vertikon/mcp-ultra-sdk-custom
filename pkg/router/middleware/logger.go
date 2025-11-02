@@ -2,9 +2,10 @@
 package middleware
 
 import (
-	"log"
 	"net/http"
 	"time"
+
+	"github.com/vertikon/mcp-ultra-sdk-custom/pkg/logger"
 )
 
 // Logger registra requests
@@ -12,9 +13,17 @@ func Logger() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now()
-			log.Printf("[%s] %s %s", r.Method, r.URL.Path, r.RemoteAddr)
+			logger.Info("http request started",
+				"method", r.Method,
+				"path", r.URL.Path,
+				"remote_addr", r.RemoteAddr,
+				"user_agent", r.UserAgent())
 			next.ServeHTTP(w, r)
-			log.Printf("[%s] %s completed in %v", r.Method, r.URL.Path, time.Since(start))
+			duration := time.Since(start)
+			logger.Info("http request completed",
+				"method", r.Method,
+				"path", r.URL.Path,
+				"duration_ms", duration.Milliseconds())
 		})
 	}
 }

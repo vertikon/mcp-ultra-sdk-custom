@@ -19,7 +19,7 @@ type RouteInjector interface {
 
 // Route define uma rota HTTP
 type Route struct {
+	Handler http.HandlerFunc // Handler da rota
 	Method  string           // GET, POST, PUT, DELETE, etc
 	Path    string           // /api/v1/resource
-	Handler http.HandlerFunc // Handler da rota
 }

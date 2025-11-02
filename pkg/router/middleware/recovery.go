@@ -2,9 +2,11 @@
 package middleware
 
 import (
-	"log"
 	"net/http"
 	"runtime/debug"
+
+	"github.com/vertikon/mcp-ultra-sdk-custom/pkg/httpx"
+	"github.com/vertikon/mcp-ultra-sdk-custom/pkg/logger"
 )
 
 // Recovery captura panics e retorna 500
@@ -13,8 +15,12 @@ func Recovery() func(http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			defer func() {
 				if err := recover(); err != nil {
-					log.Printf("PANIC: %v\n%s", err, debug.Stack())
-					http.Error(w, "Internal Server Error", 500)
+					logger.Error("panic recovered",
+						"error", err,
+						"stack", string(debug.Stack()),
+						"method", r.Method,
+						"path", r.URL.Path)
+					http.Error(w, "Internal Server Error", httpx.StatusInternalServerError)
 				}
 			}()
 			next.ServeHTTP(w, r)

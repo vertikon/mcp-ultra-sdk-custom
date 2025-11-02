@@ -1,6 +1,7 @@
 package seeds
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -10,25 +11,34 @@ import (
 )
 
 const (
-	SeedPath              = "seeds/mcp-ultra"
-	defaultDirPermissions = 0755
+	SeedPath               = "seeds/mcp-ultra"
+	defaultDirPermissions  = 0755
+	defaultFilePermissions = 0644
+	secureFilePermissions  = 0600 // Somente owner leitura/escrita
+)
+
+var (
+	// ErrTemplateNotFound indica que o template não foi encontrado
+	ErrTemplateNotFound = errors.New("template not found")
+	// ErrGoModTidyFailed indica que go mod tidy falhou
+	ErrGoModTidyFailed = errors.New("go mod tidy failed")
 )
 
 // StatusInfo contém informações sobre o status da seed
 type StatusInfo struct {
 	Path        string `json:"path"`
+	Module      string `json:"module,omitempty"`
 	HasGoMod    bool   `json:"has_go_mod"`
 	HasGoSum    bool   `json:"has_go_sum"`
 	Compiles    bool   `json:"compiles"`
 	MainPresent bool   `json:"main_present"`
-	Module      string `json:"module,omitempty"`
 }
 
 // Sync sincroniza o template para a seed interna
 func Sync(templatePath string) error {
 	// 1. Verificar se template existe
 	if _, err := os.Stat(templatePath); os.IsNotExist(err) {
-		return fmt.Errorf("template não encontrado: %s", templatePath)
+		return fmt.Errorf("%w: %s", ErrTemplateNotFound, templatePath)
 	}
 
 	// 2. Criar diretório da seed se não existir
@@ -120,7 +130,7 @@ func copyTree(src, dst string, ignore map[string]bool) error {
 			return err
 		}
 
-		// Calcular caminho relativo
+		// Calculate caminho relativo
 		rel, err := filepath.Rel(src, path)
 		if err != nil {
 			return err
@@ -202,7 +212,7 @@ func adjustGoMod(gomodPath string) error {
 
 	newContent := strings.Join(lines, "\n")
 
-	if err := os.WriteFile(gomodPath, []byte(newContent), 0644); err != nil {
+	if err := os.WriteFile(gomodPath, []byte(newContent), secureFilePermissions); err != nil {
 		return fmt.Errorf("erro ao escrever go.mod: %w", err)
 	}
 
@@ -217,7 +227,7 @@ func addReplaces(gomodPath string) error {
 
 	replaces := fmt.Sprintf("\nreplace github.com/vertikon/mcp-ultra-sdk-custom => %s\nreplace github.com/vertikon/mcp-ultra-fix => %s\n", sdkPath, fixPath)
 
-	f, err := os.OpenFile(gomodPath, os.O_APPEND|os.O_WRONLY, 0644)
+	f, err := os.OpenFile(gomodPath, os.O_APPEND|os.O_WRONLY, defaultFilePermissions)
 	if err != nil {
 		return fmt.Errorf("erro ao abrir go.mod: %w", err)
 	}
@@ -241,7 +251,7 @@ func runGoModTidy() error {
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("go mod tidy failed: %v\n%s", err, string(output))
+		return fmt.Errorf("%w: %s", ErrGoModTidyFailed, string(output))
 	}
 
 	return nil

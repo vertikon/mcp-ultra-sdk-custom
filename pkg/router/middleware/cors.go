@@ -3,7 +3,9 @@ package middleware
 
 import (
 	"net/http"
-	"strings"
+	"slices"
+
+	"github.com/vertikon/mcp-ultra-sdk-custom/pkg/httpx"
 )
 
 // CORS adiciona headers CORS
@@ -15,7 +17,7 @@ func CORS(origins []string) func(http.Handler) http.Handler {
 			// Se origins contém "*", permite qualquer origem
 			if len(origins) > 0 && origins[0] == "*" {
 				w.Header().Set("Access-Control-Allow-Origin", "*")
-			} else if origin != "" && contains(origins, origin) {
+			} else if origin != "" && slices.Contains(origins, origin) {
 				w.Header().Set("Access-Control-Allow-Origin", origin)
 			}
 
@@ -24,20 +26,11 @@ func CORS(origins []string) func(http.Handler) http.Handler {
 			w.Header().Set("Access-Control-Max-Age", "86400")
 
 			if r.Method == "OPTIONS" {
-				w.WriteHeader(204)
+				w.WriteHeader(httpx.StatusNoContent)
 				return
 			}
 
 			next.ServeHTTP(w, r)
 		})
 	}
-}
-
-func contains(slice []string, item string) bool {
-	for _, s := range slice {
-		if strings.EqualFold(s, item) {
-			return true
-		}
-	}
-	return false
 }

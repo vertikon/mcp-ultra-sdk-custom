@@ -9,7 +9,7 @@ func RequireRole(role string) func(http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			id := FromIdentity(r.Context())
 			if id == nil {
-				http.Error(w, "unauthorized", 401)
+				http.Error(w, "unauthorized", StatusUnauthorized)
 				return
 			}
 
@@ -20,7 +20,7 @@ func RequireRole(role string) func(http.Handler) http.Handler {
 				}
 			}
 
-			http.Error(w, "forbidden", 403)
+			http.Error(w, "forbidden", StatusForbidden)
 		})
 	}
 }
@@ -31,7 +31,7 @@ func RequireAnyRole(roles ...string) func(http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			id := FromIdentity(r.Context())
 			if id == nil {
-				http.Error(w, "unauthorized", 401)
+				http.Error(w, "unauthorized", StatusUnauthorized)
 				return
 			}
 
@@ -44,7 +44,7 @@ func RequireAnyRole(roles ...string) func(http.Handler) http.Handler {
 				}
 			}
 
-			http.Error(w, "forbidden", 403)
+			http.Error(w, "forbidden", StatusForbidden)
 		})
 	}
 }
